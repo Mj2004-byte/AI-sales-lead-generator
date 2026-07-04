@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LeadGen.AI — AI Sales Lead Generator</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="dark-theme">
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-logo">
+                <div class="logo-icon">
+                    <i data-lucide="sparkles"></i>
+                </div>
+                <h1>LeadGen<span>.AI</span></h1>
+            </div>
+            
+            <div class="header-actions">
+                <div class="status-badge" id="apiStatusBadge">
+                    <span class="status-indicator live"></span>
+                    <span class="status-text">Groq API Connected</span>
+                </div>
+                <button class="icon-btn" id="settingsBtn" title="API Settings">
+                    <i data-lucide="settings"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Workspace -->
+        <main class="app-workspace">
+            <!-- Sidebar: Parameters Input -->
+            <section class="sidebar-panel">
+                <div class="panel-header">
+                    <h2>Target Lead Criteria</h2>
+                    <p class="panel-subtitle">Define your ideal customer profile</p>
+                </div>
+                
+                <form id="leadCriteriaForm" class="criteria-form">
+                    <div class="form-group">
+                        <label for="industryInput">
+                            <i data-lucide="briefcase"></i> Industry / Niche
+                        </label>
+                        <input type="text" id="industryInput" placeholder="e.g. B2B SaaS, Real Estate, Fintech" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="locationInput">
+                            <i data-lucide="map-pin"></i> Target Location
+                        </label>
+                        <input type="text" id="locationInput" placeholder="e.g. Austin TX, London UK, Remote" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="targetCustomerInput">
+                            <i data-lucide="user-check"></i> Target Contact / Decision Maker
+                        </label>
+                        <input type="text" id="targetCustomerInput" placeholder="e.g. CTOs, Founders, HR Managers" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="valuePropInput">
+                            <i data-lucide="award"></i> Your Product/Service & Value Prop
+                        </label>
+                        <textarea id="valuePropInput" rows="4" placeholder="Briefly describe what you offer. AI will use this to write highly personalized cold outreach emails." required>We provide AI-powered CRM automation that helps sales teams save 10+ hours a week on manual data entry.</textarea>
+                    </div>
+
+                    <button type="submit" class="submit-btn" id="generateLeadsBtn">
+                        <span class="btn-text">Generate Leads</span>
+                        <i data-lucide="zap" class="btn-icon"></i>
+                    </button>
+                </form>
+            </section>
+
+            <!-- Dashboard / Lead Viewport -->
+            <section class="main-dashboard">
+                <!-- Welcome / Empty State -->
+                <div class="dashboard-state" id="emptyState">
+                    <div class="empty-illustration">
+                        <div class="glow-ring ring-1"></div>
+                        <div class="glow-ring ring-2"></div>
+                        <div class="glow-ring ring-3"></div>
+                        <div class="empty-icon-box">
+                            <i data-lucide="search-code"></i>
+                        </div>
+                    </div>
+                    <h2>Build Your AI Sales Pipeline</h2>
+                    <p>Enter your targeting criteria in the sidebar and let the AI find companies, extract contacts, score leads, and write cold outreach templates.</p>
+                    <div class="quick-examples">
+                        <span>Try these examples:</span>
+                        <div class="pill-group">
+                            <button class="example-pill" data-industry="E-commerce Brands" data-location="California" data-target="Founders" data-value="Eco-friendly packaging solutions that cut shipping costs by 15%.">E-commerce in CA</button>
+                            <button class="example-pill" data-industry="Dental Clinics" data-location="London" data-target="Practice Managers" data-value="Patient appointment reminder app that reduces no-shows by 40%.">Dentists in London</button>
+                            <button class="example-pill" data-industry="Cybersecurity Startups" data-location="New York" data-target="CTOs" data-value="Direct hire executive recruitment for elite security engineering talent.">Security in NYC</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Generation Loading/Progress State -->
+                <div class="dashboard-state hidden" id="loadingState">
+                    <div class="loading-header">
+                        <h2>Researching Leads</h2>
+                        <p id="loadingCriteriaText">Targeting SaaS Founders in Austin, TX</p>
+                    </div>
+
+                    <!-- Modern Progress Tracker -->
+                    <div class="progress-tracker">
+                        <div class="progress-bar-container">
+                            <div class="progress-bar-fill" id="progressBarFill"></div>
+                        </div>
+                        
+                        <ul class="progress-steps">
+                            <li class="step active" id="step1">
+                                <span class="step-icon"><i data-lucide="globe"></i></span>
+                                <span class="step-label">Scouting Target Companies</span>
+                                <span class="step-status">In progress...</span>
+                            </li>
+                            <li class="step" id="step2">
+                                <span class="step-icon"><i data-lucide="users"></i></span>
+                                <span class="step-label">Extracting Decision Makers & Contacts</span>
+                                <span class="step-status">Waiting...</span>
+                            </li>
+                            <li class="step" id="step3">
+                                <span class="step-icon"><i data-lucide="activity"></i></span>
+                                <span class="step-label">Analyzing Niche & Scoring Leads</span>
+                                <span class="step-status">Waiting...</span>
+                            </li>
+                            <li class="step" id="step4">
+                                <span class="step-icon"><i data-lucide="mail"></i></span>
+                                <span class="step-label">Drafting Personalized Outreach Emails</span>
+                                <span class="step-status">Waiting...</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="loading-details-carousel">
+                        <div class="details-carousel-inner" id="carouselConsole">
+                            <div class="console-line">Initializing target search query...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Results State -->
+                <div class="results-container hidden" id="resultsState">
+                    <div class="results-header">
+                        <div class="results-title-group">
+                            <h2>Leads Dashboard</h2>
+                            <p class="results-subtitle" id="resultsSummaryText">Found 6 high-matching leads</p>
+                        </div>
+                        
+                        <div class="results-actions">
+                            <div class="filter-tabs">
+                                <button class="filter-tab active" data-filter="all">All</button>
+                                <button class="filter-tab" data-filter="hot"><span class="badge badge-hot">🔥 Hot</span></button>
+                                <button class="filter-tab" data-filter="warm"><span class="badge badge-warm">⚡ Warm</span></button>
+                                <button class="filter-tab" data-filter="cool"><span class="badge badge-cool">❄️ Cool</span></button>
+                            </div>
+                            
+                            <button class="export-btn" id="exportCsvBtn">
+                                <i data-lucide="download"></i>
+                                <span>Export CSV</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Lead Grid -->
+                    <div class="leads-grid" id="leadsGrid">
+                        <!-- Dynamic lead cards inserted here -->
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Slide-out Lead Detail Drawer -->
+        <aside class="detail-drawer" id="detailDrawer">
+            <div class="drawer-overlay" id="drawerOverlay"></div>
+            <div class="drawer-content">
+                <div class="drawer-header">
+                    <div class="drawer-title-area">
+                        <div class="drawer-company-logo" id="drawerCompanyLogo">C</div>
+                        <div>
+                            <h3 id="drawerCompanyName">Company Name</h3>
+                            <a href="#" target="_blank" id="drawerCompanyWebsite" class="website-link">
+                                <span id="drawerWebsiteText">website.com</span>
+                                <i data-lucide="external-link"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <button class="icon-btn" id="closeDrawerBtn">
+                        <i data-lucide="x"></i>
+                    </button>
+                </div>
+
+                <div class="drawer-body">
+                    <!-- Score Breakdown Section -->
+                    <div class="drawer-section score-section">
+                        <div class="score-radial-container">
+                            <div class="score-circle">
+                                <svg class="circle-svg">
+                                    <circle class="circle-bg" cx="40" cy="40" r="35"></circle>
+                                    <circle class="circle-progress" id="drawerScoreCircle" cx="40" cy="40" r="35"></circle>
+                                </svg>
+                                <div class="score-value" id="drawerScoreValue">92</div>
+                            </div>
+                            <div class="score-label-group">
+                                <span class="score-tier badge" id="drawerScoreTier">🔥 Hot Lead</span>
+                                <span class="score-subtext">AI Relevance Score</span>
+                            </div>
+                        </div>
+                        <div class="reasoning-box">
+                            <h4>AI Scoring Reasoning</h4>
+                            <p id="drawerScoreReasoning">This company is an active match due to high alignment with criteria...</p>
+                        </div>
+                    </div>
+
+                    <!-- Contact Details Section -->
+                    <div class="drawer-section">
+                        <h4 class="section-title"><i data-lucide="user"></i> Decision Maker Contact</h4>
+                        <div class="contact-card">
+                            <div class="contact-meta">
+                                <span class="contact-name" id="drawerContactName">Jane Doe</span>
+                                <span class="contact-role" id="drawerContactRole">VP of Operations</span>
+                            </div>
+                            <ul class="contact-details-list">
+                                <li>
+                                    <span class="detail-label"><i data-lucide="mail"></i> Email</span>
+                                    <div class="detail-val-group">
+                                        <span class="detail-value" id="drawerContactEmail">jane.doe@company.com</span>
+                                        <button class="copy-tiny-btn" data-copy="drawerContactEmail" title="Copy Email">
+                                            <i data-lucide="copy"></i>
+                                        </button>
+                                    </div>
+                                </li>
+                                <li>
+                                    <span class="detail-label"><i data-lucide="phone"></i> Phone</span>
+                                    <div class="detail-val-group">
+                                        <span class="detail-value" id="drawerContactPhone">+1 (512) 555-0192</span>
+                                        <button class="copy-tiny-btn" data-copy="drawerContactPhone" title="Copy Phone">
+                                            <i data-lucide="copy"></i>
+                                        </button>
+                                    </div>
+                                </li>
+                                <li>
+                                    <span class="detail-label"><i data-lucide="linkedin"></i> LinkedIn</span>
+                                    <div class="detail-val-group">
+                                        <a href="#" target="_blank" class="detail-link" id="drawerContactLinkedIn">linkedin.com/in/janedoe</a>
+                                        <i data-lucide="external-link" class="link-icon"></i>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Outreach Email Section -->
+                    <div class="drawer-section email-section">
+                        <div class="section-header">
+                            <h4 class="section-title"><i data-lucide="mail-open"></i> Personalized Outreach Draft</h4>
+                            <button class="edit-email-btn" id="editEmailToggle" title="Edit template">
+                                <i data-lucide="edit-3"></i> <span>Edit</span>
+                            </button>
+                        </div>
+                        
+                        <div class="email-editor-container">
+                            <div class="email-subject-line">
+                                <strong>Subject:</strong> <span id="drawerEmailSubject">Quick question regarding your operation</span>
+                            </div>
+                            <textarea id="drawerEmailBody" class="email-body-text" rows="12" readonly></textarea>
+                        </div>
+                        
+                        <button class="action-btn copy-email-btn" id="copyEmailBtn">
+                            <i data-lucide="copy"></i>
+                            <span>Copy Email to Clipboard</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Settings Modal (API Configuration) -->
+        <div class="modal-backdrop hidden" id="settingsModal">
+            <div class="modal-card">
+                <div class="modal-header">
+                    <h3><i data-lucide="sliders"></i> Connection Settings</h3>
+                    <button class="icon-btn" id="closeSettingsBtn">
+                        <i data-lucide="x"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p class="modal-desc">This application uses the <strong>Groq API</strong> to research companies and write personalized cold emails. You can configure your custom API Key here.</p>
+                    
+                    <div class="form-group">
+                        <label for="apiKeyInput">Groq API Key</label>
+                        <div class="input-password-wrapper">
+                            <input type="password" id="apiKeyInput" placeholder="Enter your gsk_... API Key">
+                            <button type="button" class="toggle-password" id="togglePasswordBtn">
+                                <i data-lucide="eye"></i>
+                            </button>
+                        </div>
+                        <span class="input-hint">Your API Key is saved locally in your browser and never sent to external servers except directly to Groq.</span>
+                    </div>
+
+                    <div class="api-info-panel">
+                        <h5>Model Selected</h5>
+                        <div class="model-badge">
+                            <code>llama-3.3-70b-versatile</code>
+                            <span class="active-badge">Recommend</span>
+                        </div>
+                        <p class="model-desc-tiny">An ultra-fast, high-context model optimized for generating high-quality structured outreach copy and company analytics.</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="sec-btn" id="resetDefaultApiBtn">Use Pre-loaded Key</button>
+                    <div class="action-right">
+                        <button class="sec-btn" id="cancelSettingsBtn">Cancel</button>
+                        <button class="pri-btn" id="saveSettingsBtn">Save Settings</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast Notifications -->
+        <div class="toast-container" id="toastContainer"></div>
+    </div>
+
+    <!-- Core App Scripts -->
+    <script src="generator.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
